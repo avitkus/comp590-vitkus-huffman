@@ -6,6 +6,7 @@ public class Node implements Comparable<Node>{
 	private Node left, right;
 	private int weight;
 	private boolean isLeaf;
+	private int height;
 
 	public Node() {
 		this(null);
@@ -18,6 +19,9 @@ public class Node implements Comparable<Node>{
 		this.left = left;
 		this.right = right;
 		isLeaf = false;
+		int leftHeight = (left == null ? 0 : left.height);
+		int rightHeight = (right == null ? 0 : right.height);
+		height = 1 + Math.max(leftHeight, rightHeight);
 	}
 	
 	public Node(byte val, int weight) {
@@ -43,6 +47,7 @@ public class Node implements Comparable<Node>{
 		left = null;
 		right = null;
 		isLeaf = true;
+		height = 0;
 	}
 
 	public Node getLeft() {
@@ -50,12 +55,24 @@ public class Node implements Comparable<Node>{
 	}
 
 	public void setLeft(Node left) {
+		if (this.left != null) {
+			weight -= this.left.weight;
+		}
 		this.left = left;
 		if (left != null) {
 			left.parent = this;
 			isLeaf = false;
-		} else if (right == null) {
-			isLeaf = true;
+			weight += left.weight;
+			if (left.height >= height) {
+				height = left.height + 1;
+			}
+		} else {
+			if (right == null) {
+				isLeaf = true;
+				height = 0;
+			} else {
+				height = right.height + 1;
+			}
 		}
 	}
 
@@ -64,12 +81,24 @@ public class Node implements Comparable<Node>{
 	}
 
 	public void setRight(Node right) {
+		if (this.right != null) {
+			weight -= this.right.weight;
+		}
 		this.right = right;
 		if (right != null) {
 			isLeaf = false;
 			right.parent = this;
-		} else if (left == null) {
-			isLeaf = true;
+			weight += right.weight;
+			if (right.height >= height) {
+				height = right.height + 1;
+			}
+		} else {
+			if (left == null) {
+				isLeaf = true;
+				height = 0;
+			} else {
+				height = left.height + 1;
+			}
 		}
 	}
 
@@ -163,6 +192,10 @@ public class Node implements Comparable<Node>{
 
 	@Override
 	public int compareTo(Node o) {
-		return weight - o.weight;
+		if (weight != o.weight) {
+			return weight - o.weight;
+		} else {
+			return height - o.height;
+		}
 	}
 }

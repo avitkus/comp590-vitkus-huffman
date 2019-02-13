@@ -3,7 +3,7 @@ import java.nio.ByteBuffer;
 
 public class Decoder {
 	
-	public static String decode(byte[] raw) {
+	public static byte[] decode(byte[] raw) {
 		int codesLength = 256;
 		BigInteger code = BigInteger.ZERO;
 		int codeLen = 0;
@@ -67,9 +67,18 @@ public class Decoder {
 			}
 		}
 		
-		System.out.printf("Decoded entropy: %.5f\n", (double) bitsUsed / messageLength);
+//		System.out.printf("Decoded entropy: %.5f\n", (double) bitsUsed / messageLength);
 		
-		return new String(bb.array());
+		byte[] ret;
+		if (bb.hasArray()) {
+			ret = bb.array();
+		} else {
+			ret = new byte[bb.limit()];
+			bb.rewind();
+			bb.get(ret);
+		}
+		
+		return ret;
 	}
 	
 	public static String decodeExtended(byte[] raw) {

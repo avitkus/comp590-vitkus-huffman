@@ -1,12 +1,63 @@
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class Main {
 //	private static byte[] raw = intToByteArr(0x4, 0x42, 0x1, 0x41, 0x2, 0x43, 0x3, 0x44, 0x3, 0x0, 0x0, 0x0, 0x8, 0x6B, 0x7E, 0x0);
 	private static final String message = "hello world";
+	
+	private static final Path PROVIDED_FILE = Paths.get("compressed.dat");
+	private static final Path NEW_FILE = Paths.get("new.dat");
+	private static final Path RAW_FILE = Paths.get("raw.txt");
+	
 	public static void main(String[] args) {
+		try {
+			decompress(); // decompress provided file into raw.txt
+//			compress(); // compress raw.txt into new.dat
+//			recompress(); // decompress provided and compress into new.dat
+//			decompressNew(); // decompress new.dat into raw.txt
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void decompress() throws IOException {
+		byte[] data = Files.readAllBytes(NEW_FILE);
+		byte[] raw = Decoder.decode(data);
+		Files.deleteIfExists(RAW_FILE);
+		Files.createFile(RAW_FILE);
+		Files.write(RAW_FILE, raw);
+	}
+	
+	private static void decompressNew() throws IOException {
+		byte[] data = Files.readAllBytes(PROVIDED_FILE);
+		byte[] raw = Decoder.decode(data);
+		Files.deleteIfExists(RAW_FILE);
+		Files.createFile(RAW_FILE);
+		Files.write(RAW_FILE, raw);
+	}
+	
+	private static void recompress() throws IOException {
+		byte[] data = Files.readAllBytes(PROVIDED_FILE);
+		byte[] raw = Decoder.decode(data);
+		byte[] compressed = Encoder.encode(raw);
+		Files.deleteIfExists(NEW_FILE);
+		Files.createFile(NEW_FILE);
+		Files.write(NEW_FILE, compressed);
+	}
+	
+	private static void compress() throws IOException {
+		byte[] raw = Files.readAllBytes(RAW_FILE);
+		byte[] data = Encoder.encode(raw);
+		Files.deleteIfExists(NEW_FILE);
+		Files.createFile(NEW_FILE);
+		Files.write(NEW_FILE, data);
+	}
+		
+	private static void test() {
 		// TODO Auto-generated method stub
 		try {
 			byte[] data;
@@ -18,15 +69,17 @@ public class Main {
 //				System.out.printf("%X%X ", (b >>> 4) & 0xF, (b & 0xF));
 //			}
 //			System.out.println();
-			String message = Decoder.decode(data);
+			byte[] messageBytes = Decoder.decode(data);
+			String message = new String(messageBytes);
 			System.out.printf("Original: %7d\n", data.length);
-			data2 = Encoder.encode(message);
-			String message2 = Decoder.decode(data2);
+			data2 = Encoder.encode(messageBytes);
+			byte[] message2Bytes = Decoder.decode(data2);
+			String message2 = new String(message2Bytes);
 			System.out.printf("New:      %7d\n", data2.length);
 			System.out.printf("Savings:  %7d (%.2f%%)\n", data.length - data2.length, ((double)(data.length - data2.length) * 100) / data.length);
 //			System.out.println("Prefix? " + message.startsWith(message2));
 			System.out.println("Match? " + message.equals(message2));
-//			System.out.println(message);
+			System.out.println(message);
 //			System.out.println("Message 1 len: " + message.length());
 //			System.out.println("Message 2 len: " + message2.length());
 			for(int i = 0; i < message.length() && i < message2.length(); i ++) {

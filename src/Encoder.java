@@ -6,7 +6,7 @@ import java.util.PriorityQueue;
 import io.OutputStreamBitSink;
 
 public class Encoder {
-	public static byte[] encode(String message) {
+	public static byte[] encode(byte[] message) {
 		int codesLength = 256;
 		int[] counts = new int[codesLength];
 		int[] values = new int[codesLength];
@@ -15,28 +15,28 @@ public class Encoder {
 			counts[i] = 0;
 		}
 		
-		for(byte b : message.getBytes()) {
+		for(byte b : message) {
 			int iVal = ((int)b) & 0xFF;
 			counts[iVal] ++;
 		}
 		
 		double entropy = 0;
-		System.out.println("<table>\n<tr><th>Code</th><th>Char</th><th>Probability</th></tr>");
+//		System.out.println("<table>\n<tr><th>Code</th><th>Char</th><th>Probability</th></tr>");
 		for(int i = 0; i < codesLength; i ++) {
-			double prob = (double)counts[i] / message.length();
+			double prob = (double)counts[i] / message.length;
 			if (counts[i] != 0) {
 				entropy -= prob * Math.log(prob) / Math.log(2);
 			}
-			if (Character.isAlphabetic(i) || Character.isDigit(i)) {
-				System.out.printf("<tr><td>%2X</td><td>%c</td><td>%8.5f%%</td></tr>\n", i, i, prob * 100);
-			} else if (Character.isWhitespace(i)) {
-				System.out.printf("<tr><td>%2X</td><td>'%c'</td><td>%8.5f%%</td></tr>\n", i, i, prob * 100);
-			} else {
-				System.out.printf("<tr><td>%2X</td><td></td><td>%8.5f%%</td></tr>\n", i, prob * 100);
-			}
+//			if (Character.isAlphabetic(i) || Character.isDigit(i)) {
+//				System.out.printf("<tr><td>%2X</td><td>%c</td><td>%8.5f%%</td></tr>\n", i, i, prob * 100);
+//			} else if (Character.isWhitespace(i)) {
+//				System.out.printf("<tr><td>%2X</td><td>'%c'</td><td>%8.5f%%</td></tr>\n", i, i, prob * 100);
+//			} else {
+//				System.out.printf("<tr><td>%2X</td><td></td><td>%8.5f%%</td></tr>\n", i, prob * 100);
+//			}
 		}
-		System.out.println("</table>");
-		System.out.printf("Theoretical entropy: %.5f\n", entropy);
+//		System.out.println("</table>");
+//		System.out.printf("Theoretical entropy: %.5f\n", entropy);
 		for(int i = 1; i < codesLength; i ++) {
 			int tmpCounts = counts[i];
 			int tmpVal = values[i];
@@ -102,9 +102,9 @@ public class Encoder {
 				osbs.write(codes[i][1].byteValue(), 8);
 			}
 			
-			osbs.write(message.length(), 32);
+			osbs.write(message.length, 32);
 			
-			for(byte symbol : message.getBytes()) {
+			for(byte symbol : message) {
 
 				int iVal = ((int)symbol) & 0xFF;
 				BigInteger code = codes[iVal][0];
@@ -126,7 +126,7 @@ public class Encoder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.printf("Compressed entropy: %.5f\n", ((double)bitsUsed) / message.length());
+//		System.out.printf("Compressed entropy: %.5f\n", ((double)bitsUsed) / message.length);
 		return baos.toByteArray();
 	}
 	
